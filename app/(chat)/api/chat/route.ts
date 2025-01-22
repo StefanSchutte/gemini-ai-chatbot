@@ -16,6 +16,7 @@ import {
   getReservationById,
   saveChat,
 } from "@/db/queries";
+import { searchWeb } from "@/lib/search";
 import { generateUUID } from "@/lib/utils";
 
 export async function POST(request: Request) {
@@ -34,25 +35,20 @@ export async function POST(request: Request) {
 
   const result = await streamText({
     model: geminiProModel,
-    system: `\n
-        - you help users book flights!
-        - keep your responses limited to a sentence.
-        - DO NOT output lists.
-        - after every tool call, pretend you're showing the result to the user and keep your response limited to a phrase.
-        - today's date is ${new Date().toLocaleDateString()}.
-        - ask follow up questions to nudge user into the optimal flow
-        - ask for any details you don't know, like name of passenger, etc.'
-        - C and D are aisle seats, A and F are window seats, B and E are middle seats
-        - assume the most popular airports for the origin and destination
-        - here's the optimal flow
-          - search for flights
-          - choose flight
-          - select seats
-          - create reservation (ask user whether to proceed with payment or change reservation)
-          - authorize payment (requires user consent, wait for user to finish payment and let you know when done)
-          - display boarding pass (DO NOT display boarding pass without verifying payment)
-        '
-      `,
+    system: `
+  You are a helpful, intelligent AI assistant that can help with a wide variety of tasks including:
+  - Answering questions on any topic
+  - Writing and analysis
+  - Math and problem-solving
+  - Code and programming
+  - Creative tasks
+  
+  - Keep your responses informative yet concise
+  - Think through problems step by step
+  - Ask clarifying questions when needed
+  - Admit when you're not sure about something
+  - Today's date is ${new Date().toLocaleDateString()}
+`,
     messages: coreMessages,
     tools: {
       getWeather: {
@@ -70,6 +66,38 @@ export async function POST(request: Request) {
           return weatherData;
         },
       },
+
+      // Add new general purpose tools
+      searchWeb: {
+        description: "Search the web for current information. Use this for questions about current events, facts, or when you need up-to-date information.",
+        parameters: z.object({
+          query: z.string().describe("The search query - be specific and targeted"),
+        }),
+        execute: async ({ query }) => {
+          const results = await searchWeb(query);
+
+          return {
+            results: results.map(result => ({
+              title: result.title,
+              url: result.link,
+              excerpt: result.snippet,
+            })),
+            searchQuery: query,
+          };
+        },
+      },
+
+      calculateMath: {
+        description: "Perform mathematical calculations",
+        parameters: z.object({
+          expression: z.string().describe("Mathematical expression to evaluate"),
+        }),
+        execute: async ({ expression }) => {
+          // Implement math calculation
+          return { result: eval(expression) };
+        },
+      },
+
       displayFlightStatus: {
         description: "Display the status of a flight",
         parameters: z.object({
