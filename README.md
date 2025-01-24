@@ -17,6 +17,42 @@
 
 ## Features
 
+#My Changes
+
+1.  System Changes (route.ts):
+
+Updated system prompt to handle general queries
+Added general-purpose tools including web search capability
+Implemented Google Custom Search API integration
+
+2. UI Changes:
+
+Modified Loin/sign up styling as well as the general chat style and other small styling things:
+- Message alignment: User messages right-aligned, bot messages left-aligned
+- Bubble styling: Blue for user (white text), gray for bot (dark/light mode)
+- Fixed double bubble issue by combining all content into single container
+- Added TypeScript safety with optional chaining for toolInvocations
+- Limited message width to 80% and added proper spacing/padding
+- Proper corner rounding except near avatar side
+- Reorganized code structure for better content grouping
+- Added gradient background to outer container
+- Added glass-like effect to inner container
+- Adjusted text colors for better contrast
+- Added padding and shadow to containers
+
+New Components:
+
+Implemented search functionality in /lib/search.ts
+
+Required Configurations:
+
+Added Google Search API key
+Added Google Custom Search Engine ID
+Updated environment variables
+
+These changes transformed the chatbot from a flight-specific assistant to a general-purpose AI that can handle any type of query with search capabilities.
+[Deployed site](https://gemini-ai-chatbot-tau-tan.vercel.app/)
+
 - [Next.js](https://nextjs.org) App Router
   - Advanced routing for seamless navigation and performance
   - React Server Components (RSCs) and Server Actions for server-side rendering and increased performance
